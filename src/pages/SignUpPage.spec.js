@@ -1,5 +1,6 @@
 import SignUpPage from "./SignUpPage";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 describe("Sign Up Page", () => {
   describe("layout", () => {
@@ -61,6 +62,18 @@ describe("Sign Up Page", () => {
       render(<SignUpPage />);
       const signUp = screen.queryByRole("button", { name: "Sign Up" });
       expect(signUp).toBeDisabled();
+    });
+  });
+
+  describe("interactions", () => {
+    it("enables the button when password and password repeat fields have same value", () => {
+      render(<SignUpPage />);
+      const passwordInput = screen.getByLabelText("Password");
+      const passwordRepeatInput = screen.getByLabelText("Password Repeat");
+      userEvent.type(passwordInput, "Password");
+      userEvent.type(passwordRepeatInput, "Password");
+      const signUpButton = screen.queryByRole("button", { name: "Sign Up" });
+      expect(signUpButton).toBeEnabled();
     });
   });
 });
