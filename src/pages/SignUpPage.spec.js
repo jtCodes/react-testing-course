@@ -68,13 +68,24 @@ describe("Sign Up Page", () => {
   });
 
   describe("interactions", () => {
-    it("enables the button when password and password repeat fields have same value", () => {
+    let signUpButton;
+    const setup = () => {
       render(<SignUpPage />);
+      const usernameInput = screen.getByLabelText("Username");
+      const emailInput = screen.getByLabelText("Email");
       const passwordInput = screen.getByLabelText("Password");
       const passwordRepeatInput = screen.getByLabelText("Password Repeat");
+
+      userEvent.type(usernameInput, "user1");
+      userEvent.type(emailInput, "224f@gmail.com");
       userEvent.type(passwordInput, "Password");
       userEvent.type(passwordRepeatInput, "Password");
-      const signUpButton = screen.queryByRole("button", { name: "Sign Up" });
+
+      signUpButton = screen.queryByRole("button", { name: "Sign Up" });
+    };
+
+    it("enables the button when password and password repeat fields have same value", () => {
+      setup();
       expect(signUpButton).toBeEnabled();
     });
 
@@ -87,28 +98,53 @@ describe("Sign Up Page", () => {
         })
       );
       server.listen();
-      render(<SignUpPage />);
-      const usernameInput = screen.getByLabelText("Username");
-      const emailInput = screen.getByLabelText("Email");
-      const passwordInput = screen.getByLabelText("Password");
-      const passwordRepeatInput = screen.getByLabelText("Password Repeat");
-
-      userEvent.type(usernameInput, "user1");
-      userEvent.type(emailInput, "224f@gmail.com");
-      userEvent.type(passwordInput, "Password");
-      userEvent.type(passwordRepeatInput, "Password");
-
-      const signUpButton = screen.queryByRole("button", { name: "Sign Up" });
+      setup();
 
       userEvent.click(signUpButton);
 
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       expect(requestBody).toEqual({
         username: "user1",
         email: "224f@gmail.com",
         password: "Password",
       });
+    });
+
+    it("disables button when there is an onging api call", async () => {
+      let counter = 0;
+      const server = setupServer(
+        rest.post("/api/1.0/users", (req, res, ctx) => {
+          counter += 1;
+          return res(ctx.status(200));
+        })
+      );
+      server.listen();
+
+      setup();
+
+      userEvent.click(signUpButton);
+      userEvent.click(signUpButton);
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      expect(counter).toBe(1);
+    });
+
+    it("displays spinner after clicking the submit", async () => {
+      const server = setupServer(
+        rest.post("/api/1.0/users", (req, res, ctx) => {
+          return res(ctx.status(200));
+        })
+      );
+      server.listen();
+
+      setup();
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+      
+      userEvent.click(signUpButton);
+      const spinner = screen.getByRole("status");
+      expect(spinner).toBeInTheDocument();
     });
   });
 });
