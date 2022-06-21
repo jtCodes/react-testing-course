@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { BallTriangle, Bars } from "react-loader-spinner";
+import { Bars } from "react-loader-spinner";
 import Card from "../Card";
+import Input from "./Input";
 
 export default function SignUpPage() {
   const [apiProgress, setApiProgress] = useState(false);
@@ -12,6 +13,32 @@ export default function SignUpPage() {
     password: "",
     passwordRepeat: "",
   });
+  const inputs = [
+    {
+      id: "username",
+      type: "username",
+      label: "Username",
+      value: formData.username,
+    },
+    {
+      id: "email",
+      type: "email",
+      label: "Email",
+      value: formData.email,
+    },
+    {
+      id: "password",
+      type: "password",
+      label: "Password",
+      value: formData.password,
+    },
+    {
+      id: "passwordRepeat",
+      type: "password",
+      label: "Password Repeat",
+      value: formData.passwordRepeat,
+    },
+  ];
 
   function isSignUpButtonDisabled() {
     return (
@@ -27,7 +54,7 @@ export default function SignUpPage() {
     setFormData({ ...formData, [id]: value });
   }
 
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault();
     const body = {
       username: formData.username,
@@ -35,20 +62,21 @@ export default function SignUpPage() {
       password: formData.password,
     };
     setApiProgress(true);
-    axios.post("/api/1.0/users", body).then(() => {
+    try {
+      await axios.post("/api/1.0/users", body);
       setIsSignUpSuccess(true);
-    });
+    } catch (error) {}
   }
 
   return (
     <div className="flex justify-center h-screen">
       <div className="self-center">
         <Card
-          classNames={"bg-green-400 text-slate-50"}
+          classNames={isSignUpSuccess ? "bg-green-400 text-slate-50" : ""}
           content={
             isSignUpSuccess ? (
               <>
-                <h1 className="text-5xl font-bold text-center mb-10">
+                <h1 className="text-4xl font-bold text-center mb-10">
                   Success
                 </h1>
                 <div className="text-lg font-medium">
@@ -57,51 +85,19 @@ export default function SignUpPage() {
               </>
             ) : (
               <form
-                className="flex flex-col gap-3 w-[600px] h-max self-center"
+                className="flex flex-col gap-3 w-[500px] h-max self-center"
                 onChange={onFormChange}
                 data-testid="form-sign-up"
               >
-                <h1 className="text-6xl font-bold text-center text-slate-800 mb-10">
+                <h1 className="text-5xl font-semibold text-center text-slate-800 mb-10">
                   Sign Up
                 </h1>
-                <label className="font-semibold" htmlFor="username">
-                  Username
-                </label>
-                <input
-                  className="border rounded-md border-zinc-100 shadow-inner py-2 px-3 text-gray-700 leading-tight"
-                  id="username"
-                  type="username"
-                  value={formData.username}
-                ></input>
-                <label className="font-semibold" htmlFor="email">
-                  Email
-                </label>
-                <input
-                  className="border rounded-md border-zinc-100 shadow-inner py-2 px-3 text-gray-700 leading-tight"
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                ></input>
-                <label className="font-semibold" htmlFor="password">
-                  Password
-                </label>
-                <input
-                  className="border rounded-md border-zinc-100 shadow-inner py-2 px-3 text-gray-700 leading-tight"
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                ></input>
-                <label className="font-semibold" htmlFor="passwordRepeat">
-                  Password Repeat
-                </label>
-                <input
-                  className="border rounded-md border-zinc-100 shadow-inner py-2 px-3 text-gray-700 leading-tight"
-                  id="passwordRepeat"
-                  type="password"
-                  value={formData.passwordRepeat}
-                ></input>
+                {inputs.map((inputData) => (
+                  <Input {...inputData} />
+                ))}
                 <button
-                  className="mt-10 bg-sky-300 hover:bg-sky-400 active:bg-sky-700 text-slate-50 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-slate-100 disabled:text-slate-200"
+                  className="mt-10 bg-sky-300 hover:bg-sky-400 active:bg-sky-700 text-slate-50 
+                  font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-slate-100 disabled:text-slate-200"
                   disabled={isSignUpButtonDisabled()}
                   onClick={submit}
                 >
