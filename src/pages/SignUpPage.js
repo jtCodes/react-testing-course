@@ -13,24 +13,29 @@ export default function SignUpPage() {
     password: "",
     passwordRepeat: "",
   });
+  const [validationErrors, setValidationErrors] = useState();
+
   const inputs = [
     {
       id: "username",
       type: "username",
       label: "Username",
       value: formData.username,
+      error: validationErrors?.username
     },
     {
       id: "email",
       type: "email",
       label: "Email",
       value: formData.email,
+      error: validationErrors?.email
     },
     {
       id: "password",
       type: "password",
       label: "Password",
       value: formData.password,
+      error: validationErrors?.password
     },
     {
       id: "passwordRepeat",
@@ -65,7 +70,12 @@ export default function SignUpPage() {
     try {
       await axios.post("/api/1.0/users", body);
       setIsSignUpSuccess(true);
-    } catch (error) {}
+    } catch (error) {
+      if (error.response.status === 400) {
+        setValidationErrors(error.response.data.validationErrors);
+      }
+      setApiProgress(false)
+    }
   }
 
   return (

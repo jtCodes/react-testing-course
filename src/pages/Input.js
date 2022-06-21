@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function Input({ id, type, label, value }) {
+export default function Input({ id, type, label, value, error }) {
   return (
     <>
       <label className="font-medium" htmlFor={id}>
@@ -13,6 +13,7 @@ export default function Input({ id, type, label, value }) {
         type={type}
         value={value}
       ></input>
+      {error ? <span>{error}</span> : null}
     </>
   );
 }

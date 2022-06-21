@@ -165,5 +165,44 @@ describe("Sign Up Page", () => {
         expect(form).not.toBeInTheDocument();
       });
     });
+
+    it("displays validation message for username", async () => {
+      server.use(
+        rest.post("/api/1.0/users", (req, res, ctx) => {
+          return res(
+            ctx.status(400),
+            ctx.json({
+              validationErrors: { username: "Username cannot be null" },
+            })
+          );
+        })
+      );
+      setup();
+      userEvent.click(signUpButton);
+      const validationError = await screen.findByText(
+        "Username cannot be null"
+      );
+      expect(validationError).toBeInTheDocument(0);
+    });
+
+    it("hides spinner and enables button after respoonse received", async () => {
+      server.use(
+        rest.post("/api/1.0/users", (req, res, ctx) => {
+          return res(
+            ctx.status(400),
+            ctx.json({
+              validationErrors: { username: "Username cannot be null" },
+            })
+          );
+        })
+      );
+      setup();
+      userEvent.click(signUpButton);
+      const validationError = await screen.findByText(
+        "Username cannot be null"
+      );
+      expect(screen.queryByRole('status')).not.toBeInTheDocument()
+      expect(signUpButton).toBeEnabled();
+    });
   });
 });
