@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Bars } from "react-loader-spinner";
 import Card from "../Card";
-import Input from "./Input";
+import Input from "../input/Input";
 
 export default function SignUpPage() {
   const [apiProgress, setApiProgress] = useState(false);
@@ -21,21 +21,21 @@ export default function SignUpPage() {
       type: "username",
       label: "Username",
       value: formData.username,
-      error: validationErrors?.username
+      error: validationErrors?.username,
     },
     {
       id: "email",
       type: "email",
       label: "Email",
       value: formData.email,
-      error: validationErrors?.email
+      error: validationErrors?.email,
     },
     {
       id: "password",
       type: "password",
       label: "Password",
       value: formData.password,
-      error: validationErrors?.password
+      error: validationErrors?.password,
     },
     {
       id: "passwordRepeat",
@@ -74,7 +74,7 @@ export default function SignUpPage() {
       if (error.response.status === 400) {
         setValidationErrors(error.response.data.validationErrors);
       }
-      setApiProgress(false)
+      setApiProgress(false);
     }
   }
 
@@ -96,18 +96,21 @@ export default function SignUpPage() {
             ) : (
               <form
                 className="flex flex-col gap-3 w-[500px] h-max self-center"
-                onChange={onFormChange}
                 data-testid="form-sign-up"
               >
                 <h1 className="text-5xl font-semibold text-center text-slate-800 mb-10">
                   Sign Up
                 </h1>
                 {inputs.map((inputData) => (
-                  <Input {...inputData} />
+                  <Input
+                    key={inputData.id}
+                    {...inputData}
+                    onChange={onFormChange}
+                  />
                 ))}
                 <button
-                  className="mt-10 bg-sky-300 hover:bg-sky-400 active:bg-sky-700 text-slate-50 
-                  font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-slate-100 disabled:text-slate-200"
+                  className="mt-10 bg-sky-300 text-slate-50 font-bold py-2 px-4 rounded 
+                   hover:bg-sky-400 active:bg-sky-700 focus:outline-none focus:shadow-outline disabled:bg-slate-100 disabled:text-slate-200"
                   disabled={isSignUpButtonDisabled()}
                   onClick={submit}
                 >

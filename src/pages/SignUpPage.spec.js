@@ -83,7 +83,10 @@ describe("Sign Up Page", () => {
       })
     );
 
-    beforeEach(() => (counter = 0));
+    beforeEach(() => {
+      counter = 0;
+      server.resetHandlers();
+    });
 
     beforeAll(() => server.listen());
 
@@ -166,43 +169,47 @@ describe("Sign Up Page", () => {
       });
     });
 
-    it("displays validation message for username", async () => {
-      server.use(
-        rest.post("/api/1.0/users", (req, res, ctx) => {
-          return res(
-            ctx.status(400),
-            ctx.json({
-              validationErrors: { username: "Username cannot be null" },
-            })
-          );
-        })
-      );
+    const generateValidationError = (field, message) => {
+      return rest.post("/api/1.0/users", (req, res, ctx) => {
+        return res(
+          ctx.status(400),
+          ctx.json({
+            validationErrors: { [field]: message },
+          })
+        );
+      });
+    };
+
+    it.each`
+      field         | message
+      ${"username"} | ${"Username cannot be null"}
+      ${"email"}    | ${"Email cannot be null"}
+      ${"password"} | ${"Password cannot be null"}
+    `("displays $message for $field", async ({ field, message }) => {
+      server.use(generateValidationError(field, message));
       setup();
       userEvent.click(signUpButton);
-      const validationError = await screen.findByText(
-        "Username cannot be null"
-      );
+      const validationError = await screen.findByText(message);
       expect(validationError).toBeInTheDocument(0);
     });
 
     it("hides spinner and enables button after respoonse received", async () => {
       server.use(
-        rest.post("/api/1.0/users", (req, res, ctx) => {
-          return res(
-            ctx.status(400),
-            ctx.json({
-              validationErrors: { username: "Username cannot be null" },
-            })
-          );
-        })
+        generateValidationError("username", "Username cannot be null")
       );
       setup();
       userEvent.click(signUpButton);
       const validationError = await screen.findByText(
         "Username cannot be null"
       );
-      expect(screen.queryByRole('status')).not.toBeInTheDocument()
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
       expect(signUpButton).toBeEnabled();
     });
+
+    it("display mismatch message for password repeat input", () => {
+      setup()
+      userEvent.type(passwordInput, "Password");
+      userEvent.type(passwordRepeatInput, "Passwordfdd");
+    })
   });
 });
